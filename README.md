@@ -9,24 +9,6 @@ Two OCR back ends are supported:
 * **Kraken** with the PaddleV6 `tiny` model
 * **Pero OCR** with a local Pero model
 
-## Pipeline
-
-Both entry points share the same steps:
-
-1. **Preprocessing** (`src/yolo_segment_predict.py`, `preprocess`) – images are downscaled and their
-   contrast is normalized, so that too dark or too bright photos become comparable.
-2. **Page detection** (`src/yolo_segment_predict.py`, `run_yolo`) – a YOLO segmentation model
-   (`yolo26n-seg.pt`, with `yolo26s-seg.pt` as a fallback) detects the book page and everything
-   outside the page mask is made transparent.
-3. **Post-processing** (`src/post_yolo_processing.py`, `run_post_yolo`) – the extracted page is
-   rotated to the angle that minimizes its bounding box (deskewing), transparent borders are cropped
-   and remaining transparent areas are filled with the mean page colour.
-4. **OCR** – either `src/kraken_implementation.py` (`run_kraken`, runs the `kraken` CLI in parallel
-   over all CPU cores) or `src/pero_implementation.py` (`run_pero`). Both produce PAGE XML files.
-5. **PDF export** (`src/pdf_export.py`, `run_export`) – the page images are merged into one PDF with
-   the recognized text placed invisibly on the baselines, so the resulting PDF is searchable and the
-   text can be copied.
-
 ## Installation
 
 Python 3.11 is recommended.
@@ -96,3 +78,22 @@ Useful parameters in the main scripts:
   recognized text lines.
 * `<output_folder>/output_kraken.pdf` or `<output_folder>/output_pero.pdf` – the merged, searchable
   PDF.
+
+
+## Pipeline
+
+Both entry points share the same steps:
+
+1. **Preprocessing** (`src/yolo_segment_predict.py`, `preprocess`) – images are downscaled and their
+   contrast is normalized, so that too dark or too bright photos become comparable.
+2. **Page detection** (`src/yolo_segment_predict.py`, `run_yolo`) – a YOLO segmentation model
+   (`yolo26n-seg.pt`, with `yolo26s-seg.pt` as a fallback) detects the book page and everything
+   outside the page mask is made transparent.
+3. **Post-processing** (`src/post_yolo_processing.py`, `run_post_yolo`) – the extracted page is
+   rotated to the angle that minimizes its bounding box (deskewing), transparent borders are cropped
+   and remaining transparent areas are filled with the mean page colour.
+4. **OCR** – either `src/kraken_implementation.py` (`run_kraken`, runs the `kraken` CLI in parallel
+   over all CPU cores) or `src/pero_implementation.py` (`run_pero`). Both produce PAGE XML files.
+5. **PDF export** (`src/pdf_export.py`, `run_export`) – the page images are merged into one PDF with
+   the recognized text placed invisibly on the baselines, so the resulting PDF is searchable and the
+   text can be copied.
