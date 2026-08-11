@@ -1,3 +1,5 @@
+"""Run the Pero OCR engine on the prepared page images."""
+
 import configparser
 import os
 from pathlib import Path
@@ -20,8 +22,7 @@ def run_pero(
     save_rendered: bool = False,
     save_cropped_lines: bool = False,
 ) -> None:
-    """
-    Process all images in a folder using Pero OCR.
+    """Process all images in a folder using Pero OCR.
 
     Args:
         input_folder: Path to folder containing image files
@@ -29,10 +30,11 @@ def run_pero(
         config_path: Path to the OCR engine config file (.ini)
         save_pagexml: Whether to save results as Page XML (default: True)
         save_altoxml: Whether to save results as ALTO XML (default: False)
-        save_rendered: Whether to save images with detected text regions rendered (default: False)
-        save_cropped_lines: Whether to save individual cropped text lines (default: False)
+        save_rendered: Whether to save images with the detected text regions
+            rendered into them (default: False)
+        save_cropped_lines: Whether to save individual cropped text lines
+            (default: False)
     """
-
     # Create output folder if it doesn't exist
     os.makedirs(output_folder, exist_ok=True)
 
@@ -56,7 +58,7 @@ def run_pero(
     print(f"Found {len(image_files)} images to process")
 
     # Process each image
-    for idx, image_file in tqdm(enumerate(image_files, 1)):
+    for image_file in tqdm(image_files):
         input_image_path = os.path.join(input_folder, image_file)
         file_base_name = Path(image_file).stem
 
@@ -64,7 +66,7 @@ def run_pero(
             # Read the document page image
             image = cv2.imread(input_image_path, 1)
             if image is None:
-                print(f"  ✗ Failed to read image")
+                print("  ✗ Failed to read image")
                 continue
 
             # Init empty page content
@@ -110,7 +112,7 @@ def run_pero(
             print(f"  ✗ Error processing {image_file}: {str(e)}")
             continue
 
-    print(f"\nOCR complete!")
+    print("\nOCR complete!")
 
 
 # Example usage

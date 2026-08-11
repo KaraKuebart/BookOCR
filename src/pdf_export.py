@@ -1,3 +1,5 @@
+"""Merge the page images and their OCR results into searchable PDFs."""
+
 import glob
 import io
 import json
@@ -19,6 +21,7 @@ def make_pdf_from_pero_local(
     png_path: str = f"{input_folder}/ocr_ready",
     xml_path: str = f"{output_folder}/xmls_pero",
 ):
+    """Build a searchable PDF from local Pero PAGE XML files."""
     files = glob.glob(f"{png_path}/*.png")
     files = sorted(files)
     merger = PdfMerger()
@@ -107,6 +110,7 @@ def make_pdf_from_pero_local(
 
 
 def make_pdf_from_pero_web(path: str):
+    """Build a searchable PDF from PAGE XML files of the Pero web service."""
     files = glob.glob(f"{path}/*.JPG")
     files = sorted(files)
     merger = PdfMerger()
@@ -174,7 +178,7 @@ def make_pdf_from_pero_web(path: str):
                     font_size = max(
                         6, min(100, int(line_height * 1.15))
                     )  # Scale to 80% of height, cap at 6-24pt
-            except:
+            except Exception:
                 font_size = 36
             c.saveState()
             c.translate(x, y)
@@ -193,20 +197,18 @@ def make_pdf_from_pero_web(path: str):
 
 
 def make_pdf_from_kraken(jpg_path: str, xml_path: str):
-    """
-    Create a PDF from JPG images with invisible searchable text overlay from Kraken XML.
+    """Create a PDF from images with an invisible text layer from Kraken XML.
 
     Args:
         jpg_path: Path to folder containing JPG/PNG images
         xml_path: Path to folder containing corresponding Kraken PAGE XML files
     """
-
     try:
         canvas.registerFont(
             TTFont("DejaVu", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
         )
         font_to_use = "DejaVu"
-    except:
+    except Exception:
         font_to_use = "Helvetica"
 
     # Get all image files
@@ -326,6 +328,15 @@ def make_pdf_from_kraken(jpg_path: str, xml_path: str):
 
 
 def run_export(xml_source, pero_path: str = None):
+    """Export the OCR results of the given source as a searchable PDF.
+
+    Args:
+        xml_source: One of ``kraken``, ``pero_local`` or ``pero_web``
+        pero_path: Folder with the results of the Pero web service
+
+    Raises:
+        ValueError: If the source is unknown or the pero path is missing.
+    """
     if xml_source == "kraken":
         make_pdf_from_kraken(
             jpg_path=f"{input_folder}/ocr_ready",
@@ -340,7 +351,8 @@ def run_export(xml_source, pero_path: str = None):
             raise ValueError("No pero path specified")
     else:
         raise ValueError(
-            "invalid xml-source. XML Source must be 'kraken' or 'pero_web' or 'pero_local'"
+            "invalid xml-source. XML Source must be 'kraken' or 'pero_web' "
+            "or 'pero_local'"
         )
 
 

@@ -1,3 +1,5 @@
+"""Preprocess the input photos and detect the book pages with YOLO."""
+
 import glob
 import os
 from typing import Any, Iterator
@@ -22,12 +24,14 @@ def downscale_image(image, scale_factor: int):
 
 
 def normalize_image(input_path, output_path, downscale_factor: int):
-    """
-    Use OpenCV to normalize an image, lighting too dark images and darkening too light ones, then save it.
+    """Normalize the contrast of an image with OpenCV and save it.
+
+    Too dark images are lightened and too light ones are darkened.
 
     Args:
         input_path: Path to the input image file
         output_path: Path to save the processed image
+        downscale_factor: Factor by which the image is scaled down
     """
     # Load the image
     os.makedirs(f"{input_folder}/norm", exist_ok=True)
@@ -43,6 +47,7 @@ def normalize_image(input_path, output_path, downscale_factor: int):
 
 
 def predict_book(scale_factor):
+    """Detect the book page of the current image and cut it out."""
     # Load the original image
     original_img = cv2.imread(img_path)
     original_height, original_width = original_img.shape[:2]
@@ -94,7 +99,10 @@ def predict_book(scale_factor):
     # Create output filename
     conf_value = best_detection["conf"]
     class_name = best_detection["class_name"]
-    output_path = f"{input_folder}/yolo/{img_path.split('/')[-1]}_{class_name}_{conf_value:.2f}.png"
+    output_path = (
+        f"{input_folder}/yolo/"
+        f"{img_path.split('/')[-1]}_{class_name}_{conf_value:.2f}.png"
+    )
 
     # Save as PNG with transparent background
     # Create 4-channel image (BGR + Alpha)
@@ -109,6 +117,7 @@ def extract_books(
     book_detections: list[Any],
     results: Iterator[Results | Tensor] | list[Results] | list[Tensor],
 ):
+    """Collect all book detections of the results in ``book_detections``."""
     for result in results:
         for mask, box, cls, conf in zip(
             result.masks.xy, result.boxes.xyxy, result.boxes.cls, result.boxes.conf
@@ -126,6 +135,7 @@ def extract_books(
 
 
 def backup_detection(downscaled_img=None, book_detections=None):
+    """Retry the page detection with the bigger YOLO model."""
     results = model2.predict(downscaled_img, verbose=False)
     for result in results:
         if result.masks is None:
@@ -138,6 +148,7 @@ def backup_detection(downscaled_img=None, book_detections=None):
 
 
 def run_yolo(scale_factor=2):
+    """Detect and extract the book page of every normalized image."""
     global img_path, model, model2
     # make sure necessary paths for the whole pipeline exist
     os.makedirs(f"{input_folder}/yolo", exist_ok=True)
@@ -152,16 +163,19 @@ def run_yolo(scale_factor=2):
             to_correct_manually.append(img_path)
     if to_correct_manually:
         print(
-            f"ATTENTION: NOT ALL PAGES COULD BE DETECTED: MODELS {model.model_name} and {model2.model_name} DID NOT FIND BOOK PAGES IN: {to_correct_manually}"
+            "ATTENTION: NOT ALL PAGES COULD BE DETECTED: MODELS "
+            f"{model.model_name} and {model2.model_name} DID NOT FIND "
+            f"BOOK PAGES IN: {to_correct_manually}"
         )
     else:
-        print(f"YOLO models recognized all book pages.")
+        print("YOLO models recognized all book pages.")
 
 
 def preprocess(downscale_factor=2):
+    """Normalize every input image into the ``norm`` folder."""
     if not os.path.exists(f"{input_folder}/norm"):
         os.mkdir(f"{input_folder}/norm")
-    images = glob.glob(f"{input_folder}/*.jpg")
+    images = glob.glob(f"{input_folder}/*.jpg") + glob.glob(f"{input_folder}/*.png")
     for pre_path in tqdm(images):
         normalize_image(
             pre_path,

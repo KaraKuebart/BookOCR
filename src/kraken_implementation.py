@@ -1,3 +1,5 @@
+"""Run the Kraken OCR engine in parallel over the prepared page images."""
+
 import os
 import subprocess
 from multiprocessing import Pool
@@ -9,6 +11,7 @@ from config import input_folder, output_folder
 
 
 def process_image(args):
+    """Run the kraken CLI on a single image and write its PAGE XML."""
     img_file, output_dir = args
     output_file = output_dir / f"{img_file.stem}.xml"
     cmd = [
@@ -27,6 +30,7 @@ def process_image(args):
 
 
 def run_kraken():
+    """OCR all prepared page images with kraken, one process per CPU core."""
     os.makedirs(f"{output_folder}/xmls_kraken", exist_ok=True)
     input_dir = Path(f"{input_folder}/ocr_ready")
     output_dir = Path(f"{output_folder}/xmls_kraken")

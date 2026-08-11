@@ -1,3 +1,5 @@
+"""Deskew, crop and clean the page images produced by the YOLO segmentation."""
+
 import glob
 from typing import Tuple
 
@@ -5,7 +7,7 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 
-from config import input_folder, output_folder
+from config import input_folder
 
 
 def optimize_and_fill_book_page(
@@ -14,17 +16,20 @@ def optimize_and_fill_book_page(
     max_rotation: float = 15,
     rotation_step: float = 1,
 ) -> None:
-    """
-    Rotate a book page image to best fit a bounding box, crop transparent space,
-    and fill remaining transparency with the mean background color.
+    """Rotate a book page image to best fit a bounding box.
+
+    Transparent space is cropped and the remaining transparency is filled with
+    the mean background color.
 
     Args:
         image_path: Path to input PNG image with transparent background
         output_path: Path to save the processed image
         max_rotation: Maximum rotation angle in degrees (default 40)
         rotation_step: Step size for rotation search in degrees (default 0.5)
-    """
 
+    Raises:
+        ValueError: If the image cannot be read or has no alpha channel.
+    """
     # Read image with alpha channel
     img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
@@ -80,8 +85,7 @@ def get_bbox_area(angle: float, alpha) -> float:
 
 
 def _find_best_rotation(img: np.ndarray, max_rotation: float, step: float) -> float:
-    """Find rotation angle that minimizes bounding box area using gradient descent."""
-
+    """Find rotation angle that minimizes bbox area using gradient descent."""
     alpha = img[:, :, 3]
     current_angle = 0.0
     current_area = get_bbox_area(current_angle, alpha)
@@ -116,31 +120,34 @@ def _find_best_rotation(img: np.ndarray, max_rotation: float, step: float) -> fl
 
 def _rotate_image(img: np.ndarray, angle: float) -> np.ndarray:
     """Rotate image by angle (in degrees) around its center."""
-
     h, w = img.shape[:2]
     center = (w // 2, h // 2)
 
     # Get rotation matrix
-    M = cv2.getRotationMatrix2D(center, angle, 1.0)
+    matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
 
     # Calculate new bounding dimensions
-    cos = np.abs(M[0, 0])
-    sin = np.abs(M[0, 1])
+    cos = np.abs(matrix[0, 0])
+    sin = np.abs(matrix[0, 1])
     new_w = int((h * sin) + (w * cos))
     new_h = int((h * cos) + (w * sin))
 
     # Adjust rotation matrix for translation
-    M[0, 2] += (new_w / 2) - center[0]
-    M[1, 2] += (new_h / 2) - center[1]
+    matrix[0, 2] += (new_w / 2) - center[0]
+    matrix[1, 2] += (new_h / 2) - center[1]
 
     # Handle both grayscale and color images
     if len(img.shape) == 2:
         rotated = cv2.warpAffine(
-            img, M, (new_w, new_h), borderValue=0, flags=cv2.INTER_LINEAR
+            img, matrix, (new_w, new_h), borderValue=0, flags=cv2.INTER_LINEAR
         )
     else:
         rotated = cv2.warpAffine(
-            img, M, (new_w, new_h), borderValue=(0, 0, 0, 0), flags=cv2.INTER_LINEAR
+            img,
+            matrix,
+            (new_w, new_h),
+            borderValue=(0, 0, 0, 0),
+            flags=cv2.INTER_LINEAR,
         )
 
     return rotated
@@ -148,7 +155,6 @@ def _rotate_image(img: np.ndarray, angle: float) -> np.ndarray:
 
 def _crop_transparent_borders(img: np.ndarray) -> np.ndarray:
     """Crop transparent borders from image."""
-
     alpha = img[:, :, 3]
 
     # Find non-transparent pixels
@@ -166,8 +172,7 @@ def _crop_transparent_borders(img: np.ndarray) -> np.ndarray:
 
 
 def _get_mean_background_color(img: np.ndarray) -> Tuple[int, int, int, int]:
-    """Calculate mean color of non-transparent pixels (BGR format for OpenCV)."""
-
+    """Calculate mean color of non-transparent pixels (BGR for OpenCV)."""
     alpha = img[:, :, 3]
     mask = alpha > 0
 
@@ -189,7 +194,6 @@ def _fill_transparency(
     img: np.ndarray, fill_color: Tuple[int, int, int, int]
 ) -> np.ndarray:
     """Fill transparent areas with specified color."""
-
     alpha = img[:, :, 3]
     mask = alpha == 0
 
@@ -203,6 +207,7 @@ def _fill_transparency(
 
 
 def run_post_yolo():
+    """Deskew and clean every page image found in the ``yolo`` folder."""
     images = glob.glob(f"{input_folder}/yolo/*.png")
     for image in tqdm(images):
         optimize_and_fill_book_page(

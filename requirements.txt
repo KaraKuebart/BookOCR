@@ -8,3 +8,5 @@ PyPDF2~=3.0.1
 torch~=2.13.0
 ultralytics~=8.4.116
 nox
+kraken~=7.1
+pero-ocr~=0.7.0
