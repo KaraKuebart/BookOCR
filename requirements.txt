@@ -1,0 +1,10 @@
+opencv-python~=5.0.0.93
+numpy~=2.4.6
+tqdm~=4.70.0
+reportlab~=5.0.0
+lxml~=6.1.1
+pillow~=12.3.0
+PyPDF2~=3.0.1
+torch~=2.13.0
+ultralytics~=8.4.116
+nox
