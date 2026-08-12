@@ -10,7 +10,10 @@ from pero_ocr.core.layout import PageLayout
 from pero_ocr.document_ocr.page_parser import PageParser
 from tqdm import tqdm
 
-from config import input_folder, output_folder
+import config as config
+
+input_folder = os.path.expanduser(config.input_folder)
+output_folder = os.path.expanduser(config.output_folder)
 
 
 def run_pero(
@@ -39,11 +42,11 @@ def run_pero(
     os.makedirs(output_folder, exist_ok=True)
 
     # Read config file
-    config = configparser.ConfigParser()
-    config.read(config_path)
+    config_pero = configparser.ConfigParser()
+    config_pero.read(config_path)
 
     # Init the OCR pipeline
-    page_parser = PageParser(config, config_path=os.path.dirname(config_path))
+    page_parser = PageParser(config_pero, config_path=os.path.dirname(config_path))
 
     # Supported image extensions
     image_extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif"}

@@ -1,13 +1,17 @@
 """Deskew, crop and clean the page images produced by the YOLO segmentation."""
 
 import glob
+import os
 from typing import Tuple
 
 import cv2
 import numpy as np
 from tqdm import tqdm
 
-from config import input_folder
+import config as config
+
+input_folder = os.path.expanduser(config.input_folder)
+output_folder = os.path.expanduser(config.output_folder)
 
 
 def optimize_and_fill_book_page(
@@ -180,14 +184,9 @@ def _get_mean_background_color(img: np.ndarray) -> Tuple[int, int, int, int]:
         return (255, 255, 255, 255)  # Default to white
 
     # Calculate mean for each channel
-    mean_color = []
-    for i in range(3):  # BGR channels
-        channel_mean = int(np.mean(img[:, :, i][mask]))
-        mean_color.append(channel_mean)
+    blue, green, red = (int(np.mean(img[:, :, i][mask])) for i in range(3))
 
-    mean_color.append(255)  # Alpha channel
-
-    return tuple(mean_color)
+    return (blue, green, red, 255)  # Alpha channel
 
 
 def _fill_transparency(
@@ -210,9 +209,12 @@ def run_post_yolo():
     """Deskew and clean every page image found in the ``yolo`` folder."""
     images = glob.glob(f"{input_folder}/yolo/*.png")
     for image in tqdm(images):
+        filename = image.split("/")[-1].split(".")[0]
         optimize_and_fill_book_page(
-            image, f"{input_folder}/ocr_ready/{image.split('/')[-1].split('.')[0]}.png"
+            image,
+            f"{input_folder}/ocr_ready/{filename}.png",
         )
+    print("yolo post-processing done. Ready for OCR")
 
 
 if __name__ == "__main__":

@@ -12,3 +12,12 @@ After that, and after downloading models as described in the README.md, you can 
 os.chdir("./src")
 input_folder = "../input"
 output_folder = "../output"
+
+# Load folder paths from command line arguments, if they were given
+try:
+    from src import user_config
+
+    input_folder = user_config.input_folder
+    output_folder = user_config.output_folder
+except ImportError:
+    pass  # Use folders sepecified here

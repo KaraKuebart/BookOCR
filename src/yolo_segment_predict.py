@@ -7,12 +7,14 @@ from typing import Any, Iterator
 import cv2
 import numpy as np
 from PIL import Image
-from torch import Tensor
 from tqdm import tqdm
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
 
-from config import input_folder
+import config as config
+
+input_folder = os.path.expanduser(config.input_folder)
+output_folder = os.path.expanduser(config.output_folder)
 
 
 def downscale_image(image, scale_factor: int):
@@ -35,15 +37,13 @@ def normalize_image(input_path, output_path, downscale_factor: int):
     """
     # Load the image
     os.makedirs(f"{input_folder}/norm", exist_ok=True)
-    img = Image.open(input_path).convert("RGB")
-    img = np.array(img)
-    img = downscale_image(img, downscale_factor)
+    pil_img = Image.open(input_path).convert("RGB")
+    img = downscale_image(np.array(pil_img), downscale_factor)
 
     stretched = cv2.normalize(img, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
 
     # Save the image
-    img = Image.fromarray(stretched)
-    img.save(output_path)
+    Image.fromarray(stretched).save(output_path)
 
 
 def predict_book(scale_factor):
@@ -115,7 +115,7 @@ def predict_book(scale_factor):
 
 def extract_books(
     book_detections: list[Any],
-    results: Iterator[Results | Tensor] | list[Results] | list[Tensor],
+    results: Iterator[Results] | list[Results],
 ):
     """Collect all book detections of the results in ``book_detections``."""
     for result in results:

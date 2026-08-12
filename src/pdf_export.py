@@ -14,7 +14,10 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from tqdm import tqdm
 
-from config import input_folder, output_folder
+import config as config
+
+input_folder = os.path.expanduser(config.input_folder)
+output_folder = os.path.expanduser(config.output_folder)
 
 
 def make_pdf_from_pero_local(

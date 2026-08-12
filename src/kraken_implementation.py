@@ -7,7 +7,10 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from config import input_folder, output_folder
+import config as config
+
+input_folder = os.path.expanduser(config.input_folder)
+output_folder = os.path.expanduser(config.output_folder)
 
 
 def process_image(args):

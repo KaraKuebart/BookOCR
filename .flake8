@@ -1,0 +1,13 @@
+[flake8]
+# black formats to 88 characters, E203 is incompatible with black slicing.
+max-line-length = 88
+extend-ignore = E203
+# only require the argument/return sections when a docstring already has them
+strictness = short
+docstring_style = google
+exclude =
+    .git,
+    .nox,
+    __pycache__,
+    .venv,
+    venv
