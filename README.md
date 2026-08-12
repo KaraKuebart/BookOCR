@@ -1,6 +1,6 @@
 # BookOCR
 
-BookOCR is a small OCR pipeline for photographed book pages. It takes ordinary photos of a book, automatically finds and extracts the page from the photo, straightens and cleans
+BookOCR is a small OCR pipeline for photographed book pages. It takes ordinary photos (or scans, but intended for photos) of a book, automatically finds and cuts out the page from the photo, straightens and cleans
 it, runs OCR on it and finally exports a searchable PDF containing the page images with an invisible text layer.
 
 Two OCR back ends are supported:
