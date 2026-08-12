@@ -11,10 +11,10 @@ from tqdm import tqdm
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
 
-import config as config
+from src.import_paths import import_paths
 
-input_folder = os.path.expanduser(config.input_folder)
-output_folder = os.path.expanduser(config.output_folder)
+input_folder: str = ""
+output_folder: str = ""
 
 
 def downscale_image(image, scale_factor: int):
@@ -36,7 +36,8 @@ def normalize_image(input_path, output_path, downscale_factor: int):
         downscale_factor: Factor by which the image is scaled down
     """
     # Load the image
-    os.makedirs(f"{input_folder}/norm", exist_ok=True)
+    folder = input_folder or import_paths()[0]
+    os.makedirs(f"{folder}/norm", exist_ok=True)
     pil_img = Image.open(input_path).convert("RGB")
     img = downscale_image(np.array(pil_img), downscale_factor)
 
@@ -173,6 +174,8 @@ def run_yolo(scale_factor=2):
 
 def preprocess(downscale_factor=2):
     """Normalize every input image into the ``norm`` folder."""
+    global input_folder, output_folder
+    input_folder, output_folder = import_paths()
     if not os.path.exists(f"{input_folder}/norm"):
         os.mkdir(f"{input_folder}/norm")
     images = glob.glob(f"{input_folder}/*.jpg") + glob.glob(f"{input_folder}/*.png")

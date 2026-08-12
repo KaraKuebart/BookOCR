@@ -1,10 +1,12 @@
 import argparse
+import os
 from src.yolo_segment_predict import run_yolo, preprocess
 from src.post_yolo_processing import run_post_yolo
 from src.pero_implementation import run_pero
 from src.pdf_export import run_export
 from datetime import datetime
 import config as config
+os.chdir("./src")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run OCR pipeline")
@@ -20,6 +22,7 @@ if __name__ == "__main__":
             config.output_folder = args.output
         # write user config to temporary config file
         with open("user_config.py", "w") as f:
+            f.write("""config file containing arguments parsed via argparse.""")
             f.write(f'input_folder = "{config.input_folder}"\n')
             f.write(f'output_folder = "{config.output_folder}"\n')
 

@@ -14,17 +14,17 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from tqdm import tqdm
 
-import config as config
+from src.import_paths import import_paths
 
-input_folder = os.path.expanduser(config.input_folder)
-output_folder = os.path.expanduser(config.output_folder)
+input_folder: str = ""
+output_folder: str = ""
 
 
-def make_pdf_from_pero_local(
-    png_path: str = f"{input_folder}/ocr_ready",
-    xml_path: str = f"{output_folder}/xmls_pero",
-):
+def make_pdf_from_pero_local():
     """Build a searchable PDF from local Pero PAGE XML files."""
+    png_path = f"{input_folder}/ocr_ready"
+    xml_path = f"{output_folder}/xmls_pero"
+
     files = glob.glob(f"{png_path}/*.png")
     files = sorted(files)
     merger = PdfMerger()
@@ -340,6 +340,8 @@ def run_export(xml_source, pero_path: str = None):
     Raises:
         ValueError: If the source is unknown or the pero path is missing.
     """
+    global input_folder, output_folder
+    input_folder, output_folder = import_paths()
     if xml_source == "kraken":
         make_pdf_from_kraken(
             jpg_path=f"{input_folder}/ocr_ready",

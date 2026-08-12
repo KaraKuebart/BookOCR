@@ -9,7 +9,6 @@ Set output_folder to the directory where you want XML and PDF files saved.
 After that, and after downloading models as described in the README.md, you can run either main_kraken_paddlev6.py or main_pero.py either in an IDE or from the command line.
 """
 
-os.chdir("./src")
 input_folder = "../input"
 output_folder = "../output"
 

@@ -1,17 +1,13 @@
 """Deskew, crop and clean the page images produced by the YOLO segmentation."""
 
 import glob
-import os
 from typing import Tuple
 
 import cv2
 import numpy as np
 from tqdm import tqdm
 
-import config as config
-
-input_folder = os.path.expanduser(config.input_folder)
-output_folder = os.path.expanduser(config.output_folder)
+from src.import_paths import import_paths
 
 
 def optimize_and_fill_book_page(
@@ -207,6 +203,7 @@ def _fill_transparency(
 
 def run_post_yolo():
     """Deskew and clean every page image found in the ``yolo`` folder."""
+    input_folder, output_folder = import_paths()
     images = glob.glob(f"{input_folder}/yolo/*.png")
     for image in tqdm(images):
         filename = image.split("/")[-1].split(".")[0]

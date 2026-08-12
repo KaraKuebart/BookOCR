@@ -33,7 +33,6 @@ manually:
 The path of the input folder with the images and the output folder with the XML and PDF output can be set in the `config.py`:
 
 ```python
-os.chdir("./src")
 input_folder = "../input"
 output_folder = "../output"
 ```
@@ -42,8 +41,8 @@ output_folder = "../output"
     * The pipeline creates the subfolders `norm`, `yolo` and `ocr_ready` inside it for the intermediate results.
 * `output_folder` – the directory where the XML files (`xmls_kraken` / `xmls_pero`) and the final PDF are written.
 
-Both may point anywhere on your machine; the defaults are the `input` and `output` folders next to the project. Note that `config.py` also changes the working directory to `src`,
-so relative paths are resolved from there.
+Both may point anywhere on your machine; the defaults are the `input` and `output` folders next to the project. 
+Note that the main scripts change path to ```src```, so relative paths would have to start from there.
 
 ### Option 2: Command-Line Arguments
 

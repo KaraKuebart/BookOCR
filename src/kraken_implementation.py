@@ -7,10 +7,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-import config as config
-
-input_folder = os.path.expanduser(config.input_folder)
-output_folder = os.path.expanduser(config.output_folder)
+from src.import_paths import import_paths
 
 
 def process_image(args):
@@ -34,6 +31,7 @@ def process_image(args):
 
 def run_kraken():
     """OCR all prepared page images with kraken, one process per CPU core."""
+    input_folder, output_folder = import_paths()
     os.makedirs(f"{output_folder}/xmls_kraken", exist_ok=True)
     input_dir = Path(f"{input_folder}/ocr_ready")
     output_dir = Path(f"{output_folder}/xmls_kraken")

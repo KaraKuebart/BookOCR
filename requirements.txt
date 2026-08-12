@@ -7,4 +7,4 @@ opencv-python~=5.0.0.93
 numpy~=2.4.6
 ultralytics~=8.4.118
 pero-ocr~=0.7.0
-kraken~=7.1
+nox~=2026.8.10

@@ -10,15 +10,10 @@ from pero_ocr.core.layout import PageLayout
 from pero_ocr.document_ocr.page_parser import PageParser
 from tqdm import tqdm
 
-import config as config
-
-input_folder = os.path.expanduser(config.input_folder)
-output_folder = os.path.expanduser(config.output_folder)
+from src.import_paths import import_paths
 
 
 def run_pero(
-    input_folder: str = f"{input_folder}/ocr_ready",
-    output_folder: str = f"{output_folder}/xmls_pero",
     config_path: str = "./pero_eu_cz_print_newspapers_2022-09-26/config_cpu.ini",
     save_pagexml: bool = True,
     save_altoxml: bool = False,
@@ -28,8 +23,6 @@ def run_pero(
     """Process all images in a folder using Pero OCR.
 
     Args:
-        input_folder: Path to folder containing image files
-        output_folder: Path to folder where results will be saved
         config_path: Path to the OCR engine config file (.ini)
         save_pagexml: Whether to save results as Page XML (default: True)
         save_altoxml: Whether to save results as ALTO XML (default: False)
@@ -38,6 +31,7 @@ def run_pero(
         save_cropped_lines: Whether to save individual cropped text lines
             (default: False)
     """
+    input_folder, output_folder = import_paths()
     # Create output folder if it doesn't exist
     os.makedirs(output_folder, exist_ok=True)
 

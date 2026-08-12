@@ -17,7 +17,7 @@ def test_downscale_image_halves_the_resolution():
 
 def test_normalize_image_stretches_contrast(tmp_path, monkeypatch):
     """A low contrast image is stretched to the full value range."""
-    monkeypatch.setattr("src.yolo_segment_predict.config.input_folder", str(tmp_path))
+    monkeypatch.setattr("config.input_folder", str(tmp_path))
     input_path = tmp_path / "page.png"
     output_path = tmp_path / "page_norm.png"
     low_contrast = np.full((40, 20, 3), 100, dtype=np.uint8)
