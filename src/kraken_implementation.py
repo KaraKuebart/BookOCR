@@ -15,7 +15,7 @@ def process_image(args):
     img_file, output_dir = args
     output_file = output_dir / f"{img_file.stem}.xml"
     cmd = [
-        "kraken",
+        "../.venv/bin/kraken",
         "-i",
         str(img_file),
         str(output_file),

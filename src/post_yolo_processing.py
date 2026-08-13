@@ -5,9 +5,15 @@ from typing import Tuple
 
 import cv2
 import numpy as np
+from paddleocr import DocPreprocessor
 from tqdm import tqdm
 
 from src.import_paths import import_paths
+
+paddle_processor = DocPreprocessor(
+    use_doc_orientation_classify=True,
+    use_doc_unwarping=True,
+)
 
 
 def optimize_and_fill_book_page(
@@ -23,7 +29,7 @@ def optimize_and_fill_book_page(
 
     Args:
         image_path: Path to input PNG image with transparent background
-        output_path: Path to save the processed image
+        output_path: Path to save the processed image (folder AND image name)
         max_rotation: Maximum rotation angle in degrees (default 40)
         rotation_step: Step size for rotation search in degrees (default 0.5)
 
@@ -67,9 +73,14 @@ def optimize_and_fill_book_page(
 
     filled_img = cropped_img.copy()
     filled_img[alpha == 0] = mean_color
-
-    # Save result
     cv2.imwrite(output_path, filled_img)
+    result = paddle_processor.predict(output_path)
+    for corrected_img in result:
+        corrected_img.save_to_img(output_path)
+    image = cv2.imread(str(output_path))
+    split_x = 2 * image.shape[1] // 3
+    cropped_image = image[:-25, split_x:]
+    cv2.imwrite(str(output_path), cropped_image)
 
 
 def get_bbox_area(angle: float, alpha) -> float:
@@ -136,19 +147,13 @@ def _rotate_image(img: np.ndarray, angle: float) -> np.ndarray:
     matrix[0, 2] += (new_w / 2) - center[0]
     matrix[1, 2] += (new_h / 2) - center[1]
 
-    # Handle both grayscale and color images
-    if len(img.shape) == 2:
-        rotated = cv2.warpAffine(
-            img, matrix, (new_w, new_h), borderValue=0, flags=cv2.INTER_LINEAR
-        )
-    else:
-        rotated = cv2.warpAffine(
-            img,
-            matrix,
-            (new_w, new_h),
-            borderValue=(0, 0, 0, 0),
-            flags=cv2.INTER_LINEAR,
-        )
+    rotated = cv2.warpAffine(
+        img,
+        matrix,
+        (new_w, new_h),
+        borderValue=(0, 0, 0, 0),
+        flags=cv2.INTER_LINEAR,
+    )
 
     return rotated
 
