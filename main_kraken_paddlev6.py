@@ -22,7 +22,7 @@ if __name__ == "__main__":
             config.output_folder = args.output
         # write user config to temporary config file
         with open("user_config.py", "w") as f:
-            f.write("""config file containing arguments parsed via argparse.""")
+            f.write(""""config file containing arguments parsed via argparse."\n""")
             f.write(f'input_folder = "{config.input_folder}"\n')
             f.write(f'output_folder = "{config.output_folder}"\n')
 

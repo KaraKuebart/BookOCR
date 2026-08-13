@@ -53,7 +53,4 @@ def run_kraken():
                 total=len(img_files),
             )
         )
-
-
-if __name__ == "__main__":
-    run_kraken()
+    print("\nOCR complete!")

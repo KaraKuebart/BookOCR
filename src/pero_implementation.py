@@ -32,6 +32,8 @@ def run_pero(
             (default: False)
     """
     input_folder, output_folder = import_paths()
+    input_folder = os.path.join(input_folder, "ocr_ready")
+    output_folder = os.path.join(output_folder, "xmls_pero")
     # Create output folder if it doesn't exist
     os.makedirs(output_folder, exist_ok=True)
 
@@ -110,8 +112,3 @@ def run_pero(
             continue
 
     print("\nOCR complete!")
-
-
-# Example usage
-if __name__ == "__main__":
-    run_pero()
