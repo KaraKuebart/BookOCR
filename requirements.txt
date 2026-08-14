@@ -9,6 +9,3 @@ ultralytics~=8.4.118
 pero-ocr~=0.7.0
 nox~=2026.8.10
 kraken~=7.1
-paddleocr==3.1.1
-paddlepaddle==3.1.1
-paddlex==3.1.1

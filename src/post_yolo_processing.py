@@ -5,15 +5,10 @@ from typing import Tuple
 
 import cv2
 import numpy as np
-from paddleocr import DocPreprocessor
 from tqdm import tqdm
 
 from src.import_paths import import_paths
 
-paddle_processor = DocPreprocessor(
-    use_doc_orientation_classify=True,
-    use_doc_unwarping=True,
-)
 
 
 def optimize_and_fill_book_page(
@@ -74,13 +69,6 @@ def optimize_and_fill_book_page(
     filled_img = cropped_img.copy()
     filled_img[alpha == 0] = mean_color
     cv2.imwrite(output_path, filled_img)
-    result = paddle_processor.predict(output_path)
-    for corrected_img in result:
-        corrected_img.save_to_img(output_path)
-    image = cv2.imread(str(output_path))
-    split_x = 2 * image.shape[1] // 3
-    cropped_image = image[:-25, split_x:]
-    cv2.imwrite(str(output_path), cropped_image)
 
 
 def get_bbox_area(angle: float, alpha) -> float:
