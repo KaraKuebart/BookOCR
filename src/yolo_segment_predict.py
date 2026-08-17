@@ -156,7 +156,7 @@ def run_yolo(scale_factor=2):
     os.makedirs(f"{input_folder}/ocr_ready", exist_ok=True)
     model = YOLO("yolo26n-seg.pt")
     model2 = YOLO("yolo26s-seg.pt")
-    images = glob.glob(f"{input_folder}/norm/*.jpg")
+    images = glob.glob(f"{input_folder}/norm/*.jpg") + glob.glob(f"{input_folder}/*.png") + glob.glob(f"{input_folder}/*.JPG")
     to_correct_manually = []
     for img_path in tqdm(images):
         error = predict_book(scale_factor)
@@ -178,7 +178,7 @@ def preprocess(downscale_factor=2):
     input_folder, output_folder = import_paths()
     if not os.path.exists(f"{input_folder}/norm"):
         os.mkdir(f"{input_folder}/norm")
-    images = glob.glob(f"{input_folder}/*.jpg") + glob.glob(f"{input_folder}/*.png")
+    images = glob.glob(f"{input_folder}/*.jpg") + glob.glob(f"{input_folder}/*.png") + glob.glob(f"{input_folder}/*.JPG")
     for pre_path in tqdm(images):
         normalize_image(
             pre_path,
