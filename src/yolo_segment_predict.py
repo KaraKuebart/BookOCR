@@ -67,16 +67,20 @@ def predict_book(scale_factor):
     book_detections = []
     for result in results:
         if result.masks is None:
-            out = backup_detection(downscaled_img, book_detections)
+            out = backup_detection(downscaled_img, book_detections, model2, 1)
             if out:
-                return out
+                out = backup_detection(downscaled_img, book_detections, model3, 2)
+                if out:
+                    return out
     if not book_detections:
         extract_books(book_detections, results)
 
     if not book_detections:
-        out = backup_detection(downscaled_img, book_detections)
+        out = backup_detection(downscaled_img, book_detections, model2, 1)
         if out:
-            return out
+            out = backup_detection(downscaled_img, book_detections, model3, 2)
+            if out:
+                return out
 
     # Select the most confident book detection
     best_detection = max(book_detections, key=lambda x: x["conf"])
@@ -115,13 +119,13 @@ def predict_book(scale_factor):
 
 
 def extract_books(
-    book_detections: list[Any],
-    results: Iterator[Results] | list[Results],
+        book_detections: list[Any],
+        results: Iterator[Results] | list[Results],
 ):
     """Collect all book detections of the results in ``book_detections``."""
     for result in results:
         for mask, box, cls, conf in zip(
-            result.masks.xy, result.boxes.xyxy, result.boxes.cls, result.boxes.conf
+                result.masks.xy, result.boxes.xyxy, result.boxes.cls, result.boxes.conf
         ):
             if int(cls) == 73:
                 book_detections.append(
@@ -135,27 +139,32 @@ def extract_books(
                 )
 
 
-def backup_detection(downscaled_img=None, book_detections=None):
+def backup_detection(downscaled_img, book_detections, model_for_rerun, n_tries:int=1):
     """Retry the page detection with the bigger YOLO model."""
-    results = model2.predict(downscaled_img, verbose=False)
+    results = model_for_rerun.predict(downscaled_img, verbose=False)
     for result in results:
         if result.masks is None:
-            print(f"No masks found in {img_path} on the SECOND attempt")
+            print(f"No masks found in {img_path} after {n_tries + 1} attempts")
             return img_path
     extract_books(book_detections, results)
     if not book_detections:
-        print(f"No books found in {img_path} on the SECOND attempt")
+        print(f"No books found in {img_path}  after {n_tries + 1} attempts")
+        if n_tries == 2:
+            print(f"this was the last attempt. PAGE {img_path} WILL NOT BE PROCESSED FURTHER. PLEASE ADD MANUALLY.")
         return img_path
+    else:
+        return False
 
 
 def run_yolo(scale_factor=2):
     """Detect and extract the book page of every normalized image."""
-    global img_path, model, model2
+    global img_path, model, model2, model3
     # make sure necessary paths for the whole pipeline exist
     os.makedirs(f"{input_folder}/yolo", exist_ok=True)
     os.makedirs(f"{input_folder}/ocr_ready", exist_ok=True)
     model = YOLO("yolo26n-seg.pt")
     model2 = YOLO("yolo26s-seg.pt")
+    model3 = YOLO("yolo26m-seg.pt")
     images = glob.glob(f"{input_folder}/norm/*.jpg") + glob.glob(f"{input_folder}/*.png") + glob.glob(f"{input_folder}/*.JPG")
     to_correct_manually = []
     for img_path in tqdm(images):
@@ -164,9 +173,9 @@ def run_yolo(scale_factor=2):
             to_correct_manually.append(img_path)
     if to_correct_manually:
         print(
-            "ATTENTION: NOT ALL PAGES COULD BE DETECTED: MODELS "
-            f"{model.model_name} and {model2.model_name} DID NOT FIND "
-            f"BOOK PAGES IN: {to_correct_manually}"
+            "ATTENTION: NOT ALL PAGES COULD BE DETECTED: Neither Model "
+            f"{model.model_name} nor {model2.model_name} nor {model3.model_name} could detect"
+            f"book pages in: {to_correct_manually}"
         )
     else:
         print("YOLO models recognized all book pages.")
